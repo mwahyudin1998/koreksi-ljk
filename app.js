@@ -243,7 +243,7 @@ function drawTemplate(canvas, forPrint = false) {
   canvas.width = TEMPLATE.width;
   canvas.height = TEMPLATE.height;
   const ctx = canvas.getContext("2d");
-  const blue = "#000000";
+  const blue = "#8d8d8d";
 
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
