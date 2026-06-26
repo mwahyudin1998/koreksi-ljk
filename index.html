@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102a2a">
+  <title>KoreksiLJK — Koreksi Pilihan Ganda Otomatis</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="KoreksiLJK">
+      <span class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </span>
+      <span>Koreksi<span>LJK</span></span>
+    </a>
+    <div class="topbar-actions">
+      <span class="local-badge">● Diproses lokal di perangkat</span>
+      <button class="icon-button" id="helpButton" type="button" aria-label="Petunjuk penggunaan">?</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <span class="eyebrow">PEMERIKSAAN LEMBAR JAWABAN</span>
+        <h1>Koreksi jawaban.<br><em>Tanpa hitung manual.</em></h1>
+        <p>Buat lembar LJK, isi kunci jawaban, lalu unggah foto hasil pengerjaan. Nilai dihitung otomatis langsung di browser.</p>
+      </div>
+      <div class="hero-steps" aria-label="Tahapan penggunaan">
+        <div class="hero-step active"><b>1</b><span><strong>Siapkan</strong><small>Atur soal & kunci</small></span></div>
+        <i></i>
+        <div class="hero-step"><b>2</b><span><strong>Pindai</strong><small>Unggah lembar</small></span></div>
+        <i></i>
+        <div class="hero-step"><b>3</b><span><strong>Hasil</strong><small>Periksa nilai</small></span></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <aside class="setup-panel">
+        <div class="section-heading">
+          <span class="section-number">01</span>
+          <div>
+            <h2>Pengaturan lembar</h2>
+            <p>Tentukan format ujian</p>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Jumlah soal</span>
+            <div class="number-control">
+              <button type="button" data-step="-5" aria-label="Kurangi 5 soal">−</button>
+              <input id="questionCount" type="number" min="5" max="50" step="5" value="50">
+              <button type="button" data-step="5" aria-label="Tambah 5 soal">+</button>
+            </div>
+          </label>
+          <label class="field">
+            <span>Jumlah dinilai</span>
+            <input id="gradedCount" type="number" min="1" max="25" value="25">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Poin per 1 soal</span>
+          <input id="pointPerQuestion" type="number" min="0.01" max="1000" step="0.01" value="3">
+        </label>
+
+        <label class="field">
+          <span>KKM / batas lulus (%)</span>
+          <div class="range-wrap">
+            <input id="passingScore" type="range" min="0" max="100" value="75">
+            <output id="passingOutput">75</output>
+          </div>
+        </label>
+
+        <div class="template-actions">
+          <button class="button primary" id="printTemplate" type="button">
+            <span aria-hidden="true">↗</span> Cetak / Simpan PDF
+          </button>
+          <button class="button secondary" id="downloadTemplate" type="button">
+            <span aria-hidden="true">↓</span> Unduh PNG
+          </button>
+        </div>
+
+        <div class="tip-card">
+          <span>TIP</span>
+          <p>Template hanya berisi kotak jawaban seperti contoh. Cetak dengan skala <strong>100%</strong> dan jangan memotong tanda hitam di sudut.</p>
+        </div>
+      </aside>
+
+      <section class="key-panel">
+        <div class="section-heading key-heading">
+          <span class="section-number">02</span>
+          <div>
+            <h2>Kunci jawaban</h2>
+            <p>Klik pilihan yang benar untuk setiap soal</p>
+          </div>
+          <div class="key-progress">
+            <strong id="keyProgress">0 / 25</strong>
+            <span>terisi</span>
+          </div>
+        </div>
+
+        <div class="key-toolbar">
+          <div class="legend">
+            <span><i class="bubble sample selected">A</i> Terpilih</span>
+            <span><i class="bubble sample">B</i> Belum dipilih</span>
+          </div>
+          <button class="text-button" id="clearKey" type="button">Kosongkan semua</button>
+        </div>
+
+        <div class="answer-grid" id="answerGrid"></div>
+
+        <div class="continue-bar">
+          <p id="keyHint"><strong>Isi seluruh kunci jawaban</strong><br><span>Masih ada 25 soal yang belum diisi</span></p>
+          <button class="button accent" id="goScan" type="button" disabled>Lanjut pindai lembar <span>→</span></button>
+        </div>
+      </section>
+    </section>
+
+    <section class="scan-section" id="scanSection">
+      <div class="section-heading">
+        <span class="section-number">03</span>
+        <div>
+          <h2>Pindai lembar jawaban</h2>
+          <p>Ambil foto lurus, terang, dan seluruh lembar terlihat</p>
+        </div>
+      </div>
+
+      <div class="scan-layout">
+        <div class="upload-card" id="uploadCard">
+          <input id="imageInput" type="file" accept="image/*" capture="environment" hidden>
+          <div class="upload-idle" id="uploadIdle">
+            <div class="camera-icon">⌁</div>
+            <h3>Unggah atau foto lembar LJK</h3>
+            <p>Format JPG, PNG, atau foto langsung dari kamera</p>
+            <button class="button primary" id="chooseImage" type="button">Pilih gambar</button>
+            <small>atau jatuhkan file di area ini</small>
+          </div>
+          <div class="scan-preview hidden" id="scanPreview">
+            <canvas id="scanCanvas"></canvas>
+            <div class="corner-instruction hidden" id="cornerInstruction">
+              Seret titik <strong id="cornerName">1–4</strong> ke tengah empat kotak hitam
+            </div>
+          </div>
+        </div>
+
+        <aside class="scan-controls">
+          <div class="status-box" id="scanStatus">
+            <i>○</i>
+            <div><strong>Belum ada lembar</strong><span>Unggah foto untuk mulai membaca</span></div>
+          </div>
+          <button class="button primary full" id="analyzeButton" type="button" disabled>Analisis jawaban</button>
+          <button class="button secondary full hidden" id="manualCorners" type="button">Reset batas ke seluruh foto</button>
+          <button class="text-button full" id="replaceImage" type="button" disabled>Ganti gambar</button>
+          <div class="scan-notes">
+            <h4>Agar terbaca akurat</h4>
+            <ul>
+              <li>Gunakan pena/pensil hitam yang tebal</li>
+              <li>Hindari bayangan di atas lembar</li>
+              <li>Pastikan empat penanda sudut terlihat</li>
+              <li>Jika batas hijau meleset, seret titik sudutnya sampai tepat di tengah kotak hitam</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="result-section hidden" id="resultSection">
+      <div class="section-heading">
+        <span class="section-number">04</span>
+        <div>
+          <h2>Hasil pemeriksaan</h2>
+          <p>Tinjau nilai dan jawaban yang perlu diperiksa</p>
+        </div>
+      </div>
+      <div class="result-layout">
+        <div class="score-card">
+          <span>NILAI AKHIR</span>
+          <strong id="finalScore">0</strong>
+          <div id="passBadge" class="pass-badge">LULUS</div>
+          <p><b id="correctTotal">0</b> benar dari <b id="resultTotal">0</b> soal<br>Nilai maksimal: <b id="maxPossibleScore">0</b></p>
+        </div>
+        <div class="summary-card">
+          <div><i class="correct-dot"></i><span>Benar</span><strong id="summaryCorrect">0</strong></div>
+          <div><i class="wrong-dot"></i><span>Salah</span><strong id="summaryWrong">0</strong></div>
+          <div><i class="review-dot"></i><span>Kosong / ganda</span><strong id="summaryReview">0</strong></div>
+          <div><i class="ignored-dot"></i><span>Tidak dinilai</span><strong id="summaryIgnored">0</strong></div>
+          <button class="button secondary full" id="exportCsv" type="button">Unduh hasil CSV</button>
+        </div>
+        <div class="detail-card">
+          <div class="detail-head"><h3>Rincian jawaban</h3><span>Jawaban siswa / kunci</span></div>
+          <div id="resultGrid" class="result-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="helpDialog">
+    <button class="dialog-close" id="closeHelp" type="button" aria-label="Tutup">×</button>
+    <h2>Cara menggunakan KoreksiLJK</h2>
+    <ol>
+      <li>Atur jumlah soal LJK, jumlah jawaban yang dinilai, dan poin per soal.</li>
+      <li>Isi kunci hanya untuk nomor yang akan dinilai.</li>
+      <li>Cetak template LJK dengan ukuran A4 dan skala 100%.</li>
+      <li>Minta peserta menghitamkan satu lingkaran untuk setiap soal.</li>
+      <li>Foto seluruh lembar di tempat terang, lalu unggah fotonya.</li>
+      <li>Periksa posisi empat titik hijau dan klik “Analisis jawaban”.</li>
+    </ol>
+    <p>Semua gambar diproses di perangkat Anda dan tidak dikirim ke server.</p>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
